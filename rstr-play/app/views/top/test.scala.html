@@ -1,0 +1,33 @@
+@()
+
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>jQuery REST API sample</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    </head>
+    <body>
+        <h2>PaypalのデータをRest型のAPIで取得した後、jQuaryを利用し表示する</h2>
+
+        <h2>$ajax で読み込む</h2>
+        <ul class="ajax"></ul>
+        <script>
+                $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:9000/api/test',
+                    dataType: 'text'
+                }).done(function(text){
+                    var len = text.length;
+                    alert("success : " + len);
+                    for(var i=0; i < len; i++){
+                        $(".ajax").append('<li><a href="'+text[i].link+'">'+text[i].title+'</a></li>');
+                    }
+                }).fail(function(text){
+                    var len = text.length;
+                    alert("error : " + len);
+                    $('.ajax').append("読み込みませんでした。");
+                });
+        </script>
+    </body>
+</html>

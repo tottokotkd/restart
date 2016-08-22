@@ -1,0 +1,2 @@
+GET        /                    controllers.main.Application.index()
+GET        /test                controllers.main.Application.testpage()

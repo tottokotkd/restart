@@ -1,0 +1,12 @@
+# routes file for /controllers.auth
+
+GET         /login            controllers.auth.Auth.twitterLogin()
+GET         /user/data        controllers.auth.Auth.getUserData()
+
+
+
+
+# Routes necessary for play-pac4j
+GET         /callback         @org.pac4j.play.CallbackController.callback()
+POST        /callback         @org.pac4j.play.CallbackController.callback()
+GET         /logout           @org.pac4j.play.ApplicationLogoutController.logout()
