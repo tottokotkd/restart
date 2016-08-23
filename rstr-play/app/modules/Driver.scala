@@ -1,7 +1,6 @@
 package modules
 
 import com.tottokotkd.restart.core.model.{Driver, DriverComponent}
-import com.tottokotkd.restart.core.model.driver.DriverComponent
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 
