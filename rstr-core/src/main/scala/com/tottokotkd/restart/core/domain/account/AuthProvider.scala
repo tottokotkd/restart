@@ -23,6 +23,7 @@ trait AuthProvider {
     * @param identity auth identity
     * @return account id
     *
+    * @throws InvalidAuthIdException invalid auth id
     * @throws AccountNotFoundException account not found
     */
   def getAccount(identity: String): DBIO[AccountId]

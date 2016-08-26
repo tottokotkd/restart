@@ -10,7 +10,7 @@ trait AccountManager extends AuthProvidersComponent {
   /*** create account
     *
     * @param provider auth provider type
-    * @param identity from auth provider
+    * @param identity identity from auth provider
     * @param name account name
     * @return account id
     *
@@ -21,6 +21,22 @@ trait AccountManager extends AuthProvidersComponent {
   def createAccount(provider: AuthProviderType, identity: String, name: String): DBIO[AccountId] = {
     authProviders.get(provider) match {
       case Some(p) => p.createAccount(identity = identity, name = name)
+      case None => throw AuthProviderNotFoundException
+    }
+  }
+  /*** get account
+    *
+    * @param provider auth provider type
+    * @param identity identity from auth provider
+    * @return account id
+    *
+    * @throws AuthProviderNotFoundException auth provider is not found by name.
+    * @throws AccountNotFoundException account not found
+    * @throws InvalidAuthIdException invalid auth id
+    */
+  def getAccount(provider: AuthProviderType, identity: String): DBIO[AccountId] = {
+    authProviders.get(provider) match {
+      case Some(p) => p.getAccount(identity = identity)
       case None => throw AuthProviderNotFoundException
     }
   }
