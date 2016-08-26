@@ -34,7 +34,8 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq (
   "com.typesafe.scala-logging" %% "scala-logging" % "3.4.0" % "compile",
-  "ch.qos.logback" %  "logback-classic" % "1.1.7" % "runtime"
+  "ch.qos.logback" %  "logback-classic" % "1.1.7" % "runtime",
+  "org.slf4j" % "slf4j-nop" % "1.6.4" % "test"
 )
 
 /*

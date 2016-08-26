@@ -5,8 +5,7 @@ version := "1.0"
   flyway
  */
 
-libraryDependencies += "com.h2database" % "h2" % "1.4.192"
-flywayUrl := "jdbc:h2:file:./target/h2/rstr_db"
-flywayUser := "sa"
-flywaySchemas := Seq("rstr_account", "rstr_data")
+libraryDependencies += "org.xerial" % "sqlite-jdbc" % "3.8.11.2"
+flywayUrl := "jdbc:sqlite:C:/Users/tottokotkd/rstr-data/db"
+flywayUser := ""
 flywayLocations := Seq("filesystem:rstr-db/src/main/resources/db/migration")

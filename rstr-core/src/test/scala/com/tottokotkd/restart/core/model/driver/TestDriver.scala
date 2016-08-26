@@ -1,29 +1,31 @@
 package com.tottokotkd.restart.core.model.driver
 
+import com.tottokotkd.restart.core.domain.account.{AccountId, AccountManager, HasAccountManager, Twitter}
 import com.tottokotkd.restart.core.model.{Driver, DriverComponent, HasTables}
+import org.apache.commons.lang3.RandomStringUtils
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
+
+import scala.util.Try
 
 /**
   * Created by tottokotkd on 20/08/2016.
   */
 trait HasTestDriver extends DriverComponent
-  with HasTables {
+  with HasTables with HasAccountManager {
   val driver = new TestDriver {}
-//  import tables._
-//  import driver.profile.api._
-//  import driver._
 
-//  private val schema = Accounts.schema++  Users.schema ++ CognitosIds.schema
-//  Try(run(schema.create))
-//
-//  def createTestAccount: AuthInfo = {
-//    val c = RandomStringUtils.randomAscii(256)
-//    val a = "createTestAccountA_" + c
-//    val u = "createTestAccountU_" + c
-//    val i = "createTestAccountI_" + c
-//    run(accountManager.createAccount(accountName = a, userName = u, identity = i))
-//  }
+  import tables._
+  import tables.profile.api._
+  import driver._
+
+  def createTestTwitterAccount: AccountId = {
+    val twitterId = twiIdGen.generate
+    val accoutName = RandomStringUtils.randomAscii(64)
+    run(accountManager.createAccount(provider = Twitter, identity = twitterId, name = accoutName))
+  }
+  def generateTestTwitterId = twiIdGen.generate()
+  def generateTestName = s"test name ${RandomStringUtils.randomAscii(32)}"
 }
 
 trait TestDriver extends Driver {
