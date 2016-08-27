@@ -1,5 +1,6 @@
-package com.tottokotkd.restart.core.domain.account
+package com.tottokotkd.restart.core.domain.account.auth
 
+import com.tottokotkd.restart.core.domain.account._
 import com.tottokotkd.restart.core.model.HasTables
 import slick.dbio.DBIO
 

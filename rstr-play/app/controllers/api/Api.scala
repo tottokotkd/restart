@@ -3,7 +3,7 @@ package controllers.api
 import javax.inject.Inject
 
 import com.tottokotkd.restart.core.domain.account._
-import controllers.util.JsonController
+import controllers.util.JsonControllerExpansion
 import modules.HasSQLiteDriver
 import org.pac4j.core.config.Config
 import org.pac4j.core.profile._
@@ -18,7 +18,7 @@ import play.libs.concurrent.HttpExecutionContext
 import scala.util.Try
 
 class Api  @Inject() (val config: Config, val playSessionStore: PlaySessionStore, val ec: HttpExecutionContext)
-  extends JsonController with Security[CommonProfile] with HasAccountManager with HasSQLiteDriver {
+  extends JsonControllerExpansion with Security[CommonProfile] with HasAccountManager with HasSQLiteDriver {
 
   def getTwitterProfile(implicit request: Request[AnyContent]): Try[TwitterProfile] = {
     val webContext = new PlayWebContext(request, playSessionStore)

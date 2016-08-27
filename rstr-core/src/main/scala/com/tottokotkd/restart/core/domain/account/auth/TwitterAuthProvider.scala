@@ -1,11 +1,10 @@
-package com.tottokotkd.restart.core.domain.account
+package com.tottokotkd.restart.core.domain.account.auth
 
+import com.tottokotkd.restart.core.domain.account._
 import com.tottokotkd.restart.core.model.TablesComponent
-import com.tottokotkd.restart.core.model.codegen.Tables
-import slick.dbio._
 
-import scala.util.Try
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Try
 
 /**
   * Created by tottokotkd on 21/08/2016.
@@ -32,8 +31,9 @@ trait TwitterAuthProvider extends AuthProvider with TablesComponent {
 
   def getAccount(identity: String): DBIO[AccountId] = {
     val twitterId: Int = Try(identity.toInt).getOrElse(throw InvalidAuthIdException)
-    for {
+    val q = for {
       account <- TwitterAccounts.filter(_.twitterId === twitterId).map(_.accountId).result.headOption
     } yield account.getOrElse(throw AccountNotFoundException)
+    q.transactionally
   }
 }

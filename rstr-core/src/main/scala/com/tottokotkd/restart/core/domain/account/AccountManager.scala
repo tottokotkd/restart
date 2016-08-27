@@ -1,11 +1,20 @@
 package com.tottokotkd.restart.core.domain.account
 
-import slick.dbio.DBIO
+import com.tottokotkd.restart.core.domain.account.auth.{AuthProvidersComponent, HasAuthProviders}
+import com.tottokotkd.restart.core.model.{HasTables, TablesComponent}
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by tottokotkd on 20/08/2016.
   */
-trait AccountManager extends AuthProvidersComponent {
+
+case class AccountInfo(id: Int, name: String)
+
+trait AccountManager extends AuthProvidersComponent with TablesComponent {
+
+  import tables._
+  import tables.profile.api._
 
   /*** create account
     *
@@ -18,9 +27,12 @@ trait AccountManager extends AuthProvidersComponent {
     * @throws AlreadyUsedAuthIdException used auth id
     * @throws InvalidAuthIdException invalid auth id
     */
-  def createAccount(provider: AuthProviderType, identity: String, name: String): DBIO[AccountId] = {
+  def createAccount(provider: AuthProviderType, identity: String, name: String): DBIO[AccountInfo] = {
     authProviders.get(provider) match {
-      case Some(p) => p.createAccount(identity = identity, name = name)
+      case Some(p) => for {
+        accountId <- p.createAccount(identity = identity, name = name)
+        account <- getAccount(provider = provider, identity = identity)
+      } yield account
       case None => throw AuthProviderNotFoundException
     }
   }
@@ -28,18 +40,23 @@ trait AccountManager extends AuthProvidersComponent {
     *
     * @param provider auth provider type
     * @param identity identity from auth provider
-    * @return account id
+    * @return account data
     *
     * @throws AuthProviderNotFoundException auth provider is not found by name.
     * @throws AccountNotFoundException account not found
     * @throws InvalidAuthIdException invalid auth id
     */
-  def getAccount(provider: AuthProviderType, identity: String): DBIO[AccountId] = {
+  def getAccount(provider: AuthProviderType, identity: String): DBIO[AccountInfo] = {
     authProviders.get(provider) match {
-      case Some(p) => p.getAccount(identity = identity)
+      case Some(p) => for {
+        id <- p.getAccount(identity = identity)
+        account <- Accounts.filter(_.accountId === id).result.headOption
+      } yield account.map(toAccountInfo).getOrElse(throw AccountNotFoundException)
       case None => throw AuthProviderNotFoundException
     }
   }
+
+  private def toAccountInfo(accountsRow: AccountsRow): AccountInfo = AccountInfo(id = accountsRow.accountId.get, name = accountsRow.name)
 }
 
 trait AccountManagerComponent {
@@ -47,5 +64,5 @@ trait AccountManagerComponent {
 }
 
 trait HasAccountManager extends AccountManagerComponent{
-  val accountManager: AccountManager = new AccountManager with HasAuthProviders
+  val accountManager: AccountManager = new AccountManager with HasAuthProviders with HasTables
 }

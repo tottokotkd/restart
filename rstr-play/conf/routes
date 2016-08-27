@@ -4,11 +4,12 @@
 
 # Home page
 
-GET        /assets/*file         controllers.Assets.versioned(path="/public", file)
+GET        /assets/*file        controllers.Assets.versioned(path="/public", file)
 
-->         /                     rt.top.Routes
-->         /auth                 rt.auth.Routes
-->         /api                  rt.api.Routes
+->         /                    rt.top.Routes
+->         /auth                rt.auth.Routes
+->         /api                 rt.api.Routes
+->         /play                rt.play.Routes
 
 
 

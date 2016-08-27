@@ -8,7 +8,7 @@ import scala.util._
 /**
   * Created by tottokotkd on 21/08/2016.
   */
-trait JsonController extends Controller {
+trait JsonControllerExpansion { this: Controller =>
 
   def JsonAction[T](r: Reads[T])(act: T => Request[AnyContent] => Result): Action[AnyContent] = Action { request =>
     request.body.asJson.flatMap(_.asOpt[T](r)) match {

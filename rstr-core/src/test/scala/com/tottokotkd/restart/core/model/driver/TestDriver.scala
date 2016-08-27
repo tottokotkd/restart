@@ -1,6 +1,6 @@
 package com.tottokotkd.restart.core.model.driver
 
-import com.tottokotkd.restart.core.domain.account.{AccountId, AccountManager, HasAccountManager, Twitter}
+import com.tottokotkd.restart.core.domain.account._
 import com.tottokotkd.restart.core.model.{Driver, DriverComponent, HasTables}
 import org.apache.commons.lang3.RandomStringUtils
 import slick.backend.DatabaseConfig
@@ -19,7 +19,7 @@ trait HasTestDriver extends DriverComponent
   import tables.profile.api._
   import driver._
 
-  def createTestTwitterAccount: AccountId = {
+  def createTestTwitterAccount: AccountInfo = {
     val twitterId = twiIdGen.generate
     val accoutName = RandomStringUtils.randomAscii(64)
     run(accountManager.createAccount(provider = Twitter, identity = twitterId, name = accoutName))

@@ -1,5 +1,6 @@
 package com.tottokotkd.restart.core.domain.account
 
+import com.tottokotkd.restart.core.domain.account.auth.HasAuthProviders
 import com.tottokotkd.restart.core.model.driver.HasTestDriver
 import org.apache.commons.lang3.RandomStringUtils
 import org.specs2._
