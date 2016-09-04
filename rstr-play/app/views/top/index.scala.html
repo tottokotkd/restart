@@ -1,0 +1,13 @@
+@(message: String)
+
+@views.html.common.main("Welcome to Play") {
+
+    @message
+    <ul>
+        <li><a href="/auth/login">log in</a></li>
+        <li><a href="/auth/logout">log out</a></li>
+    </ul>
+
+
+
+}

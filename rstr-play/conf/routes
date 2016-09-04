@@ -1,0 +1,21 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+
+GET        /assets/*file        controllers.Assets.versioned(path="/public", file)
+
+->         /                    rt.top.Routes
+->         /auth                rt.auth.Routes
+->         /api                 rt.api.Routes
+->         /play                rt.play.Routes
+
+
+
+
+
+
+
+
+    

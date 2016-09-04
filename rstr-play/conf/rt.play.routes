@@ -1,0 +1,4 @@
+
+# game controllers.api
+GET        /        controllers.api.Api.test()
+
