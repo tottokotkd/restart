@@ -14,8 +14,8 @@ trait AuthProvider {
     * @param identity auth identity
     * @return account id
     *
-    * @throws AlreadyUsedAuthIdException used auth id
-    * @throws InvalidAuthIdException invalid auth id
+    * @throws AlreadyUsedAuthIdException used id
+    * @throws InvalidAuthIdException invalid id
     */
   def createAccount(identity: String, name: String): DBIO[AccountId]
 
@@ -24,7 +24,7 @@ trait AuthProvider {
     * @param identity auth identity
     * @return account id
     *
-    * @throws InvalidAuthIdException invalid auth id
+    * @throws InvalidAuthIdException invalid id
     * @throws AccountNotFoundException account not found
     */
   def getAccount(identity: String): DBIO[AccountId]
