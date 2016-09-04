@@ -19,13 +19,11 @@ trait AccountManager extends AuthProvidersComponent with TablesComponent {
   /*** create account
     *
     * @param provider auth provider type
-    * @param identity identity from auth provider
+    * @param identity identity string from auth provider
     * @param name account name
     * @return account id
     *
-    * @throws AuthProviderNotFoundException auth provider is not found by name.
-    * @throws AlreadyUsedAuthIdException used auth id
-    * @throws InvalidAuthIdException invalid auth id
+    * @throws AuthProviderNotFoundException auth provider not found
     */
   def createAccount(provider: AuthProviderType, identity: String, name: String): DBIO[AccountInfo] = {
     authProviders.get(provider) match {
@@ -39,12 +37,11 @@ trait AccountManager extends AuthProvidersComponent with TablesComponent {
   /*** get account
     *
     * @param provider auth provider type
-    * @param identity identity from auth provider
+    * @param identity identity string from auth provider
     * @return account data
     *
     * @throws AuthProviderNotFoundException auth provider is not found by name.
     * @throws AccountNotFoundException account not found
-    * @throws InvalidAuthIdException invalid auth id
     */
   def getAccount(provider: AuthProviderType, identity: String): DBIO[AccountInfo] = {
     authProviders.get(provider) match {
