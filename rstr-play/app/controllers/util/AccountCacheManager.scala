@@ -30,7 +30,7 @@ class CacheManager @Inject() (val cache: CacheApi) {
 
 }
 
-class AccountModule @Inject()(val config: Config, val playSessionStore: PlaySessionStore, val ec: HttpExecutionContext, val cacheManager: CacheManager)
+class AccountModule @Inject()(val config: Config, val playSessionStore: PlaySessionStore, override val ec: HttpExecutionContext, val cacheManager: CacheManager)
   extends Controller with Security[CommonProfile] {
 
   def getTwitterProfile(implicit request: Request[AnyContent]): Try[TwitterProfile] = {
