@@ -27,7 +27,7 @@ class Auth @Inject() (val secure: AccountModule)
 
     secure.cacheManager.setAccountCache(accountInfo)
 
-    Ok(views.html.top.index(s"account id: $accountInfo"))
+    Redirect("/")
   }
 
   def disconnected = Action {

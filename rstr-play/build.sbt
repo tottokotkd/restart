@@ -6,9 +6,7 @@ version := "1.0"
 libraryDependencies ++= Seq(
   cache , ws, filters, specs2 % Test,
   "commons-io" % "commons-io" % "2.4",
-  "org.xerial" % "sqlite-jdbc" % "3.8.11.2",
-
-  "ch.qos.logback" %  "logback-classic" % "1.1.7")
+  "org.xerial" % "sqlite-jdbc" % "3.8.11.2")
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
 

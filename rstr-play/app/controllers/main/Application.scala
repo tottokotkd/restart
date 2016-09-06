@@ -15,7 +15,7 @@ import play.libs.concurrent.HttpExecutionContext
 
 import scala.util.Try
 
-class Application @Inject() (val config: Config, val playSessionStore: PlaySessionStore, val ec: HttpExecutionContext) extends Controller with Security[CommonProfile] {
+class Application extends Controller {
 
   def index = Action { implicit request =>
     Ok(views.html.top.index("Your new application is ready."))
