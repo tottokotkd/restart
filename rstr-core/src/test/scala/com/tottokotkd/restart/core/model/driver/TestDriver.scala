@@ -25,7 +25,7 @@ trait HasTestDriver extends DriverComponent
     run(accountManager.createAccount(provider = Twitter, identity = twitterId, name = accoutName))
   }
   def generateTestTwitterId = twiIdGen.generate()
-  def generateTestName = s"test name ${RandomStringUtils.randomAscii(32)}"
+  def generateRandomString(key: String = "") = s"$key ${RandomStringUtils.randomAscii(32)}"
 }
 
 trait TestDriver extends Driver {
