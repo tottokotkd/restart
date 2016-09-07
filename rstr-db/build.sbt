@@ -4,8 +4,10 @@ version := "1.0"
 /*
   flyway
  */
+// https://mvnrepository.com/artifact/org.postgresql/postgresql
+libraryDependencies += "org.postgresql" % "postgresql" % "9.4.1209"
 
-libraryDependencies += "org.xerial" % "sqlite-jdbc" % "3.8.11.2"
-flywayUrl := "jdbc:sqlite:C:/Users/tottokotkd/rstr-data/db"
-flywayUser := ""
+flywayUrl := "jdbc:postgresql://localhost:5432/rstr_test"
+flywayUser := "rstr_admin"
+flywayPassword := "sXMYq7ez5fZZnstyXcEkLpYdhfmW37Ud"
 flywayLocations := Seq("filesystem:rstr-db/src/main/resources/db/migration")
