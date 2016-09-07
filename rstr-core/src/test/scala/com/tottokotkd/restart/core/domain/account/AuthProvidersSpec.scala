@@ -17,7 +17,7 @@ class AuthProvidersSpec extends mutable.Specification with HasAuthProviders with
   import tables._
   import tables.profile.api._
 
-
+  def generateTestName = generateRandomString("auth providers spec")
 
   "auth providers should" >> {
 

@@ -15,6 +15,7 @@ class AccountManagerSpec extends mutable.Specification with HasAccountManager wi
   import tables._
   import tables.profile.api._
 
+  def generateTestName = generateRandomString("account manager spec ")
 
   "Account Manager should" >> {
 
