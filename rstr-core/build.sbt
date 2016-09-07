@@ -42,17 +42,21 @@ libraryDependencies ++= Seq (
   slick codegen
  */
 //libraryDependencies +=  "org.slf4j" % "slf4j-nop" % "1.7.21"
+libraryDependencies += "org.postgresql" % "postgresql" % "9.4.1209"
+
 
 sourceManaged <<= baseDirectory
 lazy val slickCodeGen = TaskKey[Seq[File]]("slick-codegen")
 lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
 
   val outputDir = (dir / "src/main/scala").getPath
-  val url = "jdbc:sqlite:C:/Users/tottokotkd/rstr-data/db"
-  val jdbcDriver = "org.sqlite.JDBC"
-  val slickDriver = "slick.driver.SQLiteDriver"
+  val url = "jdbc:postgresql://localhost:5432/rstr_test"
+  val jdbcDriver = "org.postgresql.Driver"
+  val slickDriver = "slick.driver.PostgresDriver"
   val pkg = "com.tottokotkd.restart.core.model.codegen"
-  toError(r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg), s.log))
+  val user = "rstr_admin"
+  val password = "sXMYq7ez5fZZnstyXcEkLpYdhfmW37Ud"
+  toError(r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg, user, password), s.log))
   Seq[File]()
 }
 slickCodeGen <<= slickCodeGenTask
