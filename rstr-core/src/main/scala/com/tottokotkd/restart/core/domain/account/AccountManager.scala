@@ -53,7 +53,7 @@ trait AccountManager extends AuthProvidersComponent with TablesComponent {
     }
   }
 
-  private def toAccountInfo(accountsRow: AccountsRow): AccountInfo = AccountInfo(id = accountsRow.accountId.get, name = accountsRow.name)
+  private def toAccountInfo(accountsRow: AccountsRow): AccountInfo = AccountInfo(id = accountsRow.accountId, name = accountsRow.name)
 }
 
 trait AccountManagerComponent {

@@ -41,7 +41,6 @@ libraryDependencies ++= Seq (
 /*
   slick codegen
  */
-//libraryDependencies +=  "org.slf4j" % "slf4j-nop" % "1.7.21"
 libraryDependencies += "org.postgresql" % "postgresql" % "9.4.1209"
 
 

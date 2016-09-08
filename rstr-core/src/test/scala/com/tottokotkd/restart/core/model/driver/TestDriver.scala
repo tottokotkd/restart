@@ -29,5 +29,5 @@ trait HasTestDriver extends DriverComponent
 }
 
 trait TestDriver extends Driver {
-  val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("sqliteTestDb")
+  val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("postgresTestDb")
 }

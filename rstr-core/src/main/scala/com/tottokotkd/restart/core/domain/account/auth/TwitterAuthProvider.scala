@@ -17,14 +17,14 @@ trait TwitterAuthProvider extends AuthProvider with TablesComponent {
 
   def createAccount(identity: String, name: String): DBIO[AccountId] = {
     val twitterId: Int = Try(identity.toInt).getOrElse(throw InvalidAuthIdException)
-    val autoIncrements = (AutoInc.Accounts.map(_.name)) returning AutoInc.Accounts.map(_.accountId)
+    val autoIncrements = (Accounts.map(_.name)) returning Accounts.map(_.accountId)
 
     val q = for {
       isUsed <- TwitterAccounts.filter(_.twitterId === twitterId).exists.result
       result <- if (isUsed) DBIO.failed(AlreadyUsedAuthIdException) else for {
         accountId <- autoIncrements += name
-        _ <- TwitterAccounts += TwitterAccountsRow(twitterId = Some(twitterId), accountId = accountId.get)
-      } yield accountId.get
+        _ <- TwitterAccounts += TwitterAccountsRow(twitterId = twitterId, accountId = accountId)
+      } yield accountId
     } yield result
     q.transactionally
   }

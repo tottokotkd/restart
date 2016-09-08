@@ -1,5 +1,5 @@
 CREATE TABLE rstr_account.accounts (
-  account_id INTEGER PRIMARY KEY  ,
+  account_id SERIAL PRIMARY KEY  ,
   name TEXT NOT NULL
 );
 
