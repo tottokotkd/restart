@@ -76,6 +76,32 @@ class ResourceManagerSpec extends mutable.Specification with HasTestDriver with 
         }
       }
     }
+    "saveResoruce" >> {
+
+      "1. success pattern" >> {
+        implicit val auth = createTestTwitterAccount
+
+        val initData = ResourceInfo(money = 1, cc = 2)
+        val latestData = ResourceInfo(money = 10001, cc = 10002)
+
+        val (count, resource) = run(for {
+          _ <- resourceManager.initResource(initData)
+          c <- resourceManager.overwriteResoruce(latestData)
+          r <- resourceManager.getResource
+        } yield (c, r))
+        count must_== 1
+        resource must_== latestData
+      }
+
+      "expected errors" >> {
+        "ResourceNotInitializedError" >> {
+          implicit val auth = createTestTwitterAccount
+          val data = ResourceInfo(money = 1, cc = 2)
+          Try(run(resourceManager.overwriteResoruce(data))) must beFailedTry(ResourceNotInitializedError)
+        }
+      }
+
+    }
 
   }
 

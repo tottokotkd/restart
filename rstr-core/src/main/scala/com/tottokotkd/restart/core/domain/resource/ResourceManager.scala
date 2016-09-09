@@ -49,6 +49,22 @@ trait ResourceManager extends TablesComponent {
     q.transactionally
   }
 
+  /*** save resource (sql update)
+    *
+    * @param data resource data
+    * @return update count
+    *
+    * @throws ResourceNotInitializedError resouce data is not yet initialized
+    */
+  def overwriteResoruce(data: ResourceInfo)(implicit accountInfo: AccountInfo): DBIO[Int] = {
+    def toRow(r: ResourceInfo): ResourcesRow = ResourcesRow(accountId = accountInfo.id, money = r.money, cc = r.cc)
+    val q = for {
+      _ <- getResource
+      result <- Resources.filter(_.accountId === accountInfo.id).update(toRow(data))
+    } yield result
+    q.transactionally
+  }
+
 }
 
 trait ResourceManagerComponent {
