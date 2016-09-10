@@ -38,7 +38,7 @@ trait ResourceManager extends TablesComponent {
     *
     * @return resource data
     *
-    * @throws ResourceNotInitializedError resouce data is not yet initialized
+    * @throws ResourceNotInitializedError resource data is not yet initialized
     */
   def getResource(implicit accountInfo: AccountInfo): DBIO[ResourceInfo] = {
     def toInfo(r: ResourcesRow): ResourceInfo = ResourceInfo(money = r.money, cc = r.cc)
@@ -54,7 +54,7 @@ trait ResourceManager extends TablesComponent {
     * @param data resource data
     * @return update count
     *
-    * @throws ResourceNotInitializedError resouce data is not yet initialized
+    * @throws ResourceNotInitializedError resource data is not yet initialized
     */
   def overwriteResoruce(data: ResourceInfo)(implicit accountInfo: AccountInfo): DBIO[Int] = {
     def toRow(r: ResourceInfo): ResourcesRow = ResourcesRow(accountId = accountInfo.id, money = r.money, cc = r.cc)

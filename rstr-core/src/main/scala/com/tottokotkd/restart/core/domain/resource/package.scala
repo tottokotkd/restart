@@ -12,7 +12,7 @@ package object resource {
   val ccPerMinute = 100
 
   sealed class ResourceManagerException(message: String = null, cause: Throwable = null) extends RstrRuntimeException(message, cause)
-  object ResourceAlreadyInitializedError extends ResourceManagerException(message = "resouce data is already initialized")
-  object ResourceNotInitializedError extends ResourceManagerException(message = "resouce data is not yet initialized")
+  object ResourceAlreadyInitializedError extends ResourceManagerException(message = "resource data is already initialized")
+  object ResourceNotInitializedError extends ResourceManagerException(message = "resource data is not yet initialized")
 
 }
