@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import com.tottokotkd.restart.core.domain.account.{AccountId, AccountInfo, HasAccountManager, Twitter}
 import controllers.util.AccountModule
-import modules.HasSQLiteDriver
+import modules.HasPsqlDriver
 import play.api.mvc._
 
 import scala.util.Try
@@ -12,7 +12,7 @@ import scala.util.Try
 class Auth @Inject() (val secure: AccountModule)
   extends Controller
     with HasAccountManager
-    with HasSQLiteDriver {
+    with HasPsqlDriver {
 
   import driver.run
 

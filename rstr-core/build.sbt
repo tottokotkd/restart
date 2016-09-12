@@ -11,6 +11,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % slickVersion,
   "com.typesafe.slick" % "slick-hikaricp_2.11" % slickVersion,
   "com.typesafe.slick" %% "slick-codegen" % slickVersion,
+  "org.postgresql" % "postgresql" % "9.4.1209",
 
   "org.scalaz" % "scalaz-core_2.11" % "7.2.4",
   "commons-codec" % "commons-codec" % "1.10",
@@ -38,12 +39,20 @@ libraryDependencies ++= Seq (
   "org.slf4j" % "slf4j-nop" % "1.6.4" % "test"
 )
 
+
+/*
+  flyway
+ */
+flywayUrl := "jdbc:postgresql://localhost:5432/rstr_test"
+flywayUser := "rstr_admin"
+flywayPassword := "sXMYq7ez5fZZnstyXcEkLpYdhfmW37Ud"
+flywayLocations := Seq("filesystem:rstr-db/src/main/resources/db/migration")
+flywaySchemas := Seq("public", "rstr_account", "rstr_data", "rstr_stamp")
+flywayTable := "shcema_version"
+
 /*
   slick codegen
  */
-libraryDependencies += "org.postgresql" % "postgresql" % "9.4.1209"
-
-
 sourceManaged <<= baseDirectory
 lazy val slickCodeGen = TaskKey[Seq[File]]("slick-codegen")
 lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>

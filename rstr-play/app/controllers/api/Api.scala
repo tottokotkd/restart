@@ -4,11 +4,11 @@ import javax.inject.Inject
 
 import com.tottokotkd.restart.core.domain.account._
 import controllers.util.{AccountModule, JsonControllerExpansion}
-import modules.HasSQLiteDriver
+import modules.HasPsqlDriver
 
 class Api @Inject() (val secure: AccountModule)
   extends HasAccountManager
-    with HasSQLiteDriver {
+    with HasPsqlDriver {
 
   import secure._
 
