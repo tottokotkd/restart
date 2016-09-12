@@ -139,6 +139,6 @@ class ResourceManagerSpec extends mutable.Specification with HasTestDriver with 
 
       }
     }
-    
+
   }
 }

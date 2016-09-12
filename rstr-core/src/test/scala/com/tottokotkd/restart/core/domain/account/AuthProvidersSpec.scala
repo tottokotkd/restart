@@ -1,23 +1,33 @@
 package com.tottokotkd.restart.core.domain.account
 
+import java.time.ZoneId
+
 import com.tottokotkd.restart.core.domain.account.auth.HasAuthProviders
 import com.tottokotkd.restart.core.model.driver.HasTestDriver
 import org.apache.commons.lang3.RandomStringUtils
 import org.specs2._
 
-import scala.util.Try
+import scala.util.{Random, Try}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by tottokotkd on 22/08/2016.
   */
 
-class AuthProvidersSpec extends mutable.Specification with HasAuthProviders with HasTestDriver {
+class AuthProvidersSpec extends mutable.Specification with HasAuthProviders with HasTestDriver with HasAccountManager {
 
   import driver._
   import tables._
   import tables.profile.api._
 
   def generateTestName = generateRandomString("auth providers spec")
+  def getRandomeZoneId = {
+    import scala.collection.JavaConverters._
+    val IDs = ZoneId.getAvailableZoneIds.asScala.toSeq
+    val randomId = IDs(Random.nextInt(IDs.length))
+    run(accountManager.getDbTimeZoneId(ZoneId.of(randomId)))
+  }
+  def getTestAccountId(): AccountId = run((Accounts returning Accounts.map(_.accountId)) += AccountsRow(accountId = 0, name = generateTestName, zoneId = getRandomeZoneId))
 
   "auth providers should" >> {
 
@@ -27,50 +37,25 @@ class AuthProvidersSpec extends mutable.Specification with HasAuthProviders with
         val provider = authProviders(Twitter)
 
         val testId = generateTestTwitterId.toString
-        val name = s"test name ${RandomStringUtils.randomAscii(32)}"
+        val accountId = getTestAccountId
 
-        val accountId = run(provider.createAccount(identity = testId, name = name))
+        val result = run(provider.registerAccount(accountId = accountId, identity = testId))
 
-        "a. to create provider specified data" >> {
+        "1. to create provider specified data" >> {
           val data = run(TwitterAccounts.filter(_.twitterId === testId.toInt).result)
           data must be length 1
           data.head.accountId must_== accountId
         }
-        "b. to create account data" >> {
-          val data = run(Accounts.filter(_.accountId === accountId).result)
-          data must be length 1
-          data.head.name must_== name
-        }
 
-        "c. to throw expected exceptions" >> {
-          val overlapCase = Try(run(provider.createAccount(identity = testId, name = name)))
+        "2. expected errors" >> {
+          val overlapCase = Try(run(provider.registerAccount(accountId = accountId, identity = testId)))
           overlapCase must beFailedTry(AlreadyUsedAuthIdException)
 
-          val invalidCase = Try(run(provider.createAccount(identity = "id must be numeric", name = name)))
+          val invalidCase = Try(run(provider.registerAccount(accountId = accountId, identity = "id must be numeric")))
           invalidCase must beFailedTry(InvalidAuthIdException)
         }
 
       }
-
     }
-
-    "return account" >> {
-      "1. twitter" >> {
-        val provider = authProviders(Twitter)
-
-        val testId = generateTestTwitterId
-        val testName = generateTestName
-        val accountId = run(provider.createAccount(identity = testId, name = testName))
-
-        val result = run(provider.getAccount(testId))
-        result must_== accountId
-
-        val invalidId = "-0"
-        Try(run(provider.getAccount(invalidId))) must beFailedTry(AccountNotFoundException)
-
-      }
-    }
-
   }
-
 }

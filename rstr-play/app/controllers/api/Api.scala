@@ -13,7 +13,7 @@ class Api @Inject() (val secure: AccountModule)
   import secure._
 
   def test = AuthAction { req => accountInfo =>
-    Ok(s"user account: ${accountInfo.id}, name: ${accountInfo.name}")
+    Ok(s"user account: ${accountInfo.id}, name: ${accountInfo.name}, timezone: ${accountInfo.zoneId.getId}")
   }
 
 }
