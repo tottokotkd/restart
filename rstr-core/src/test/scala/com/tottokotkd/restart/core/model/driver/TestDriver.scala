@@ -1,5 +1,7 @@
 package com.tottokotkd.restart.core.model.driver
 
+import java.time.ZoneId
+
 import com.tottokotkd.restart.core.domain.account._
 import com.tottokotkd.restart.core.model.{Driver, DriverComponent, HasTables}
 import org.apache.commons.lang3.RandomStringUtils
@@ -22,7 +24,7 @@ trait HasTestDriver extends DriverComponent
   def createTestTwitterAccount: AccountInfo = {
     val twitterId = twiIdGen.generate
     val accoutName = RandomStringUtils.randomAscii(64)
-    run(accountManager.createAccount(provider = Twitter, identity = twitterId, name = accoutName))
+    run(accountManager.createAccount(provider = Twitter, identity = twitterId, name = accoutName, zoneId = ZoneId.systemDefault))
   }
   def generateTestTwitterId = twiIdGen.generate()
   def generateRandomString(key: String = "") = s"$key ${RandomStringUtils.randomAscii(32)}"

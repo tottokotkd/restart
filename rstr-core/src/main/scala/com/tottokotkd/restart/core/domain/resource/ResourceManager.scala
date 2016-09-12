@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 case class ResourceInfo(money: Int, cc: Int)
 
-trait ResourceManager extends TablesComponent {
+trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
 
   import tables._
   import tables.profile.api._
@@ -65,6 +65,35 @@ trait ResourceManager extends TablesComponent {
     q.transactionally
   }
 
+  /*** apply CC gain
+    *
+    * @param data current resource data
+    * @param start start of target span
+    * @param end end of target span
+    * @return applied resource info data
+    */
+  def applyCcGain(data: ResourceInfo, start: ZonedDateTime, end: ZonedDateTime)(implicit accountInfo: AccountInfo): DBIO[ResourceInfo]= {
+
+    import Implicits._
+
+    def saveStamp(id: Int, time: ZonedDateTime): DBIO[Int] = for {
+      exists <- CcGains.filter(_.accountId === id).exists.result
+      result <- if (exists) CcGains.filter(_.accountId === id).map(_.lastUpdate).update(time) else CcGains += CcGainsRow(accountId = id, lastUpdate = time)
+    } yield result
+
+    resourceCalculator.ccGain(current = data.cc , start = start, end = end).map { ccValue =>
+      import Implicits._
+      val newData = data.copy(cc = ccValue)
+      for {
+        _ <- Resources.filter(_.accountId === accountInfo.id).update(toResourceRow(newData))
+        _ <- saveStamp(id = accountInfo.id, time = end)
+      } yield newData
+    }.getOrElse(DBIO.successful(data))
+  }
+
+  private def toResourceRow(r: ResourceInfo)(implicit accountInfo: AccountInfo): ResourcesRow = ResourcesRow(accountId = accountInfo.id, money = r.money, cc = r.cc)
+
+
 }
 
 trait ResourceManagerComponent {
@@ -72,5 +101,7 @@ trait ResourceManagerComponent {
 }
 
 trait HasResourceManager extends ResourceManagerComponent {
-  val resourceManager = new ResourceManager with HasTables
+  val resourceManager = new ResourceManager
+    with HasResourceCalculator
+    with HasTables
 }

@@ -1,5 +1,7 @@
 package com.tottokotkd.restart.core.domain.resource
 
+import java.time.ZonedDateTime
+
 import com.tottokotkd.restart.core.model.driver.HasTestDriver
 import org.specs2._
 
@@ -18,7 +20,7 @@ class ResourceManagerSpec extends mutable.Specification with HasTestDriver with 
 
   "ResourceManagerSpec" >> {
 
-    "initResource test" >> {
+    "initResource" >> {
 
       "1. default param" >> {
         implicit val auth = createTestTwitterAccount
@@ -55,7 +57,7 @@ class ResourceManagerSpec extends mutable.Specification with HasTestDriver with 
       }
     }
 
-    "getResource test" >> {
+    "getResource" >> {
 
       "1. success pattern" >> {
         implicit val auth = createTestTwitterAccount
@@ -76,6 +78,7 @@ class ResourceManagerSpec extends mutable.Specification with HasTestDriver with 
         }
       }
     }
+
     "saveResoruce" >> {
 
       "1. success pattern" >> {
@@ -100,9 +103,42 @@ class ResourceManagerSpec extends mutable.Specification with HasTestDriver with 
           Try(run(resourceManager.overwriteResoruce(data))) must beFailedTry(ResourceNotInitializedError)
         }
       }
-
     }
 
-  }
+    "applyCcGain" >> {
 
+      val start = ZonedDateTime.now
+
+      "1. initial" >> {
+        implicit val auth = createTestTwitterAccount
+        val end = start.plusMinutes(5)
+
+        // cc param.: init. 200, gain 200/min., max 1000
+        val q = for {
+          initData <- resourceManager.initResource()
+          result <- resourceManager.applyCcGain(data = initData, start = start, end = end)
+        } yield (initData, result)
+        val (initData, result) = run(q)
+        result.cc must_== 700
+        result must_== initData.copy(cc = result.cc)
+      }
+
+      "2. repeat" >> {
+        implicit val auth = createTestTwitterAccount
+        // cc param.: init. 200, gain 200/min., max 1000
+        val q = for {
+          initData <- resourceManager.initResource()
+          first <- resourceManager.applyCcGain(initData, start, start.plusMinutes(5))
+          lastUpdate <- CcGains.filter(_.accountId === auth.id).map(_.lastUpdate).result.head.map(Implicits.toZonedDateTime)
+          second <- resourceManager.applyCcGain(first, lastUpdate, lastUpdate.plusMinutes(2))
+        } yield (initData, second)
+
+        val (initData, result) = run(q)
+        result.cc must_== 900
+        result must_== initData.copy(cc = result.cc)
+
+      }
+    }
+    
+  }
 }
