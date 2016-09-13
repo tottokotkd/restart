@@ -34,9 +34,9 @@ class ResourceManagerSpec extends mutable.Specification with HasTestDriver with 
         resourceRow must be length 1
         resourceRow.head must_== ResourcesRow(accountId = auth.id, money = initialResource.money, cc = initialResource.cc)
 
-        val ccGainRow = run(CcGains.filter(_.accountId === auth.id).result)
-        ccGainRow must be length 1
-        ccGainRow.head must_== CcGainsRow(accountId = auth.id, lastUpdate = stamp)
+        val defaultLog = run(DefaultGainLogs.filter(_.accountId === auth.id).result)
+        defaultLog must be length 1
+        defaultLog.head must_== DefaultGainLogsRow(accountId = auth.id, lastUpdate = stamp)
       }
 
       "2. specified param" >> {
@@ -116,30 +116,34 @@ class ResourceManagerSpec extends mutable.Specification with HasTestDriver with 
       "1. initial" >> {
         implicit val auth = createTestTwitterAccount
         val end = start.plusMinutes(5)
+        val initData = run(resourceManager.initResource(stamp = ZonedDateTime.now))
 
         // cc param.: init. 200, gain 200/min., max 1000
-        val q = for {
-          initData <- resourceManager.initResource(stamp = ZonedDateTime.now)
-          result <- resourceManager.applyCcGain(data = initData, start = start, end = end)
-        } yield (initData, result)
-        val (initData, result) = run(q)
+        val update = resourceManager.gainCc(data = ResourceUpdateData(initData), start = start, end = end)
+        val result = run(resourceManager.applyUpdate(update))
         result.cc must_== 700
         result must_== initData.copy(cc = result.cc)
+
+        val log = run(DefaultGainLogs.filter(_.accountId === auth.id).result.head)
+        Implicits.toZonedDateTime(log.lastUpdate) must_== end
       }
 
       "2. repeat" >> {
         implicit val auth = createTestTwitterAccount
-        // cc param.: init. 200, gain 200/min., max 1000
-        val q = for {
-          initData <- resourceManager.initResource(stamp = ZonedDateTime.now)
-          first <- resourceManager.applyCcGain(initData, start, start.plusMinutes(5))
-          lastUpdate <- CcGains.filter(_.accountId === auth.id).map(_.lastUpdate).result.head.map(Implicits.toZonedDateTime)
-          second <- resourceManager.applyCcGain(first, lastUpdate, lastUpdate.plusMinutes(2))
-        } yield (initData, second)
+        val initData = run(resourceManager.initResource(stamp = ZonedDateTime.now))
 
-        val (initData, result) = run(q)
+        // cc param.: init. 200, gain 200/min., max 1000
+        val midTime = start.plusMinutes(5)
+        val endTime = midTime.plusMinutes(2)
+        val first = resourceManager.gainCc(ResourceUpdateData(initData), start, midTime)
+        val second = resourceManager.gainCc(first, midTime, endTime)
+        val result = run(resourceManager.applyUpdate(second))
+
         result.cc must_== 900
         result must_== initData.copy(cc = result.cc)
+
+        val log = run(DefaultGainLogs.filter(_.accountId === auth.id).result.head)
+        Implicits.toZonedDateTime(log.lastUpdate) must_== endTime
 
       }
     }

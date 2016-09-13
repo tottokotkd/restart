@@ -13,6 +13,10 @@ package object resource {
   val initialResource = ResourceInfo(money = 200, cc = 200)
   val ccGainPerMinute = GainPerMinute(100, 1000)
 
+  sealed class QueryTable
+  object ResourcesTable extends QueryTable
+  object DefaultGainLogTable extends QueryTable
+
   sealed class ResourceManagerException(message: String = null, cause: Throwable = null) extends RstrRuntimeException(message, cause)
   object ResourceAlreadyInitializedError extends ResourceManagerException(message = "resource data is already initialized")
   object ResourceNotInitializedError extends ResourceManagerException(message = "resource data is not yet initialized")

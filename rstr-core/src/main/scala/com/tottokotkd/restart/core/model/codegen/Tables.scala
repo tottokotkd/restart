@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Accounts.schema, CcGains.schema, Resources.schema, ShcemaVersion.schema, TimeZoneIds.schema, TwitterAccounts.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Accounts.schema, DefaultGainLogs.schema, Resources.schema, ShcemaVersion.schema, TimeZoneIds.schema, TwitterAccounts.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -47,31 +47,31 @@ trait Tables {
   /** Collection-like TableQuery object for table Accounts */
   lazy val Accounts = new TableQuery(tag => new Accounts(tag))
 
-  /** Entity class storing rows of table CcGains
+  /** Entity class storing rows of table DefaultGainLogs
    *  @param accountId Database column account_id SqlType(int4), PrimaryKey
    *  @param lastUpdate Database column last_update SqlType(timestamptz) */
-  case class CcGainsRow(accountId: Int, lastUpdate: java.sql.Timestamp)
-  /** GetResult implicit for fetching CcGainsRow objects using plain SQL queries */
-  implicit def GetResultCcGainsRow(implicit e0: GR[Int], e1: GR[java.sql.Timestamp]): GR[CcGainsRow] = GR{
+  case class DefaultGainLogsRow(accountId: Int, lastUpdate: java.sql.Timestamp)
+  /** GetResult implicit for fetching DefaultGainLogsRow objects using plain SQL queries */
+  implicit def GetResultDefaultGainLogsRow(implicit e0: GR[Int], e1: GR[java.sql.Timestamp]): GR[DefaultGainLogsRow] = GR{
     prs => import prs._
-    CcGainsRow.tupled((<<[Int], <<[java.sql.Timestamp]))
+    DefaultGainLogsRow.tupled((<<[Int], <<[java.sql.Timestamp]))
   }
-  /** Table description of table cc_gains. Objects of this class serve as prototypes for rows in queries. */
-  class CcGains(_tableTag: Tag) extends Table[CcGainsRow](_tableTag, Some("rstr_stamp"), "cc_gains") {
-    def * = (accountId, lastUpdate) <> (CcGainsRow.tupled, CcGainsRow.unapply)
+  /** Table description of table default_gain_logs. Objects of this class serve as prototypes for rows in queries. */
+  class DefaultGainLogs(_tableTag: Tag) extends Table[DefaultGainLogsRow](_tableTag, Some("rstr_stamp"), "default_gain_logs") {
+    def * = (accountId, lastUpdate) <> (DefaultGainLogsRow.tupled, DefaultGainLogsRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(accountId), Rep.Some(lastUpdate)).shaped.<>({r=>import r._; _1.map(_=> CcGainsRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(accountId), Rep.Some(lastUpdate)).shaped.<>({r=>import r._; _1.map(_=> DefaultGainLogsRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column account_id SqlType(int4), PrimaryKey */
     val accountId: Rep[Int] = column[Int]("account_id", O.PrimaryKey)
     /** Database column last_update SqlType(timestamptz) */
     val lastUpdate: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("last_update")
 
-    /** Foreign key referencing Accounts (database name cc_gains_account_id_fkey) */
-    lazy val accountsFk = foreignKey("cc_gains_account_id_fkey", accountId, Accounts)(r => r.accountId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Accounts (database name default_gain_logs_account_id_fkey) */
+    lazy val accountsFk = foreignKey("default_gain_logs_account_id_fkey", accountId, Accounts)(r => r.accountId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
   }
-  /** Collection-like TableQuery object for table CcGains */
-  lazy val CcGains = new TableQuery(tag => new CcGains(tag))
+  /** Collection-like TableQuery object for table DefaultGainLogs */
+  lazy val DefaultGainLogs = new TableQuery(tag => new DefaultGainLogs(tag))
 
   /** Entity class storing rows of table Resources
    *  @param accountId Database column account_id SqlType(int4), PrimaryKey

@@ -4,7 +4,9 @@ import java.time.ZonedDateTime
 
 import com.tottokotkd.restart.core.domain.account.AccountInfo
 import com.tottokotkd.restart.core.model.{HasTables, TablesComponent}
+import slick.lifted.TableQuery
 
+import scala.collection.immutable.HashMap
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -12,6 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 
 case class ResourceInfo(money: Int, cc: Int)
+case class ResourceUpdateData(resource: ResourceInfo, stamps: HashMap[QueryTable, slick.dbio.DBIO[Int]] = HashMap())
 
 trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
 
@@ -30,7 +33,7 @@ trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
       isExist <- Resources.filter(_.accountId === accountInfo.id).exists.result
       _ <- if (isExist) DBIO.failed(ResourceAlreadyInitializedError) else for {
         _ <- Resources += ResourcesRow(accountId = accountInfo.id, money = data.money, cc = data.cc)
-        _ <- CcGains += CcGainsRow(accountId = accountInfo.id, lastUpdate = stamp)
+        _ <- DefaultGainLogs += DefaultGainLogsRow(accountId = accountInfo.id, lastUpdate = stamp)
       } yield ()
       d <- getResource
     } yield d
@@ -52,7 +55,7 @@ trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
     q.transactionally
   }
 
-  /*** save resource (ADMIN. TOOL)
+  /*** save resource
     *
     * @param data resource data
     * @return update count
@@ -74,11 +77,15 @@ trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
     */
   def defaultUpdate(target: ZonedDateTime)(implicit accountInfo: AccountInfo): DBIO[ResourceInfo] = {
     import Implicits.toZonedDateTime
+
     val q = for {
       resource <- getResource
-      lastCcUpdate <- CcGains.filter(_.accountId === accountInfo.id).map(_.lastUpdate).result.head
-      ccUpdated <- applyCcGain(data = resource, start = lastCcUpdate, end = target)
-    } yield ccUpdated
+      lastUpdate <- DefaultGainLogs.filter(_.accountId === accountInfo.id).map(_.lastUpdate).result.head
+      latestData <- {
+        val ccUpdated = gainCc(data = ResourceUpdateData(resource = resource), start = lastUpdate, end = target)
+        applyUpdate(ccUpdated)
+      }
+    } yield latestData
     q.transactionally
   }
 
@@ -89,26 +96,28 @@ trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
     * @param end end of target span
     * @return applied resource info data
     */
-  def applyCcGain(data: ResourceInfo, start: ZonedDateTime, end: ZonedDateTime)(implicit accountInfo: AccountInfo): DBIO[ResourceInfo]= {
+  def gainCc(data: ResourceUpdateData, start: ZonedDateTime, end: ZonedDateTime)(implicit accountInfo: AccountInfo): ResourceUpdateData =
+    resourceCalculator.ccGain(current = data.resource.cc, start = start, end = end).map { ccValue =>
+      data.copy(
+        resource = data.resource.copy(cc = ccValue),
+        stamps = data.stamps + (DefaultGainLogTable -> saveDefaultGainLog(time = end))
+      )
+    }.getOrElse(data)
 
-    import Implicits._
-
-    def saveStamp(id: Int, time: ZonedDateTime): DBIO[Int] = for {
-      exists <- CcGains.filter(_.accountId === id).exists.result
-      result <- if (exists) CcGains.filter(_.accountId === id).map(_.lastUpdate).update(time) else CcGains += CcGainsRow(accountId = id, lastUpdate = time)
-    } yield result
-
-    resourceCalculator.ccGain(current = data.cc , start = start, end = end).map { ccValue =>
-      val newData = data.copy(cc = ccValue)
-      for {
-        _ <- Resources.filter(_.accountId === accountInfo.id).update(toResourceRow(newData))
-        _ <- saveStamp(id = accountInfo.id, time = end)
-      } yield newData
-    }.getOrElse(DBIO.successful(data))
-  }
+  def applyUpdate(data: ResourceUpdateData)(implicit accountInfo: AccountInfo): DBIO[ResourceInfo] = for {
+    _ <- DBIO.sequence(data.stamps.values.toSeq)
+    result <- overwriteResource(data.resource)
+  } yield data.resource
 
   private def toResourceRow(r: ResourceInfo)(implicit accountInfo: AccountInfo): ResourcesRow = ResourcesRow(accountId = accountInfo.id, money = r.money, cc = r.cc)
 
+  private def saveDefaultGainLog(time: ZonedDateTime)(implicit accountInfo: AccountInfo): DBIO[Int] = {
+    import Implicits.toSqlTimestamp
+    for {
+      exists <- DefaultGainLogs.filter(_.accountId === accountInfo.id).exists.result
+      result <- if (exists) DefaultGainLogs.filter(_.accountId === accountInfo.id).map(_.lastUpdate).update(time) else DefaultGainLogs += DefaultGainLogsRow(accountId = accountInfo.id, lastUpdate = time)
+    } yield result
+  }
 
 }
 
