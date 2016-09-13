@@ -56,7 +56,7 @@ trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
     *
     * @throws ResourceNotInitializedError resource data is not yet initialized
     */
-  def overwriteResoruce(data: ResourceInfo)(implicit accountInfo: AccountInfo): DBIO[Int] = {
+  def overwriteResource(data: ResourceInfo)(implicit accountInfo: AccountInfo): DBIO[Int] = {
     def toRow(r: ResourceInfo): ResourcesRow = ResourcesRow(accountId = accountInfo.id, money = r.money, cc = r.cc)
     val q = for {
       _ <- getResource
