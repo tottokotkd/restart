@@ -11,6 +11,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % slickVersion,
   "com.typesafe.slick" % "slick-hikaricp_2.11" % slickVersion,
   "com.typesafe.slick" %% "slick-codegen" % slickVersion,
+  "org.postgresql" % "postgresql" % "9.4.1209",
 
   "org.scalaz" % "scalaz-core_2.11" % "7.2.4",
   "commons-codec" % "commons-codec" % "1.10",
@@ -38,21 +39,32 @@ libraryDependencies ++= Seq (
   "org.slf4j" % "slf4j-nop" % "1.6.4" % "test"
 )
 
+
+/*
+  flyway
+ */
+flywayUrl := "jdbc:postgresql://localhost:5432/rstr_test"
+flywayUser := "rstr_admin"
+flywayPassword := "sXMYq7ez5fZZnstyXcEkLpYdhfmW37Ud"
+flywayLocations := Seq("filesystem:rstr-db/src/main/resources/db/migration")
+flywaySchemas := Seq("public", "rstr_account", "rstr_data", "rstr_stamp")
+flywayTable := "shcema_version"
+
 /*
   slick codegen
  */
-//libraryDependencies +=  "org.slf4j" % "slf4j-nop" % "1.7.21"
-
 sourceManaged <<= baseDirectory
 lazy val slickCodeGen = TaskKey[Seq[File]]("slick-codegen")
 lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
 
   val outputDir = (dir / "src/main/scala").getPath
-  val url = "jdbc:sqlite:C:/Users/tottokotkd/rstr-data/db"
-  val jdbcDriver = "org.sqlite.JDBC"
-  val slickDriver = "slick.driver.SQLiteDriver"
+  val url = "jdbc:postgresql://localhost:5432/rstr_test"
+  val jdbcDriver = "org.postgresql.Driver"
+  val slickDriver = "slick.driver.PostgresDriver"
   val pkg = "com.tottokotkd.restart.core.model.codegen"
-  toError(r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg), s.log))
+  val user = "rstr_admin"
+  val password = "sXMYq7ez5fZZnstyXcEkLpYdhfmW37Ud"
+  toError(r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg, user, password), s.log))
   Seq[File]()
 }
 slickCodeGen <<= slickCodeGenTask

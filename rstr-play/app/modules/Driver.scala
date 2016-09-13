@@ -8,10 +8,10 @@ import slick.driver.JdbcProfile
   * Created by tottokotkd on 21/08/2016.
   */
 
-trait SQLiteDriver extends Driver {
-  val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("sqliteDb")
+trait PostgresDriver extends Driver {
+  val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("postgresDb")
 }
 
-trait HasSQLiteDriver extends DriverComponent {
-  val driver = new SQLiteDriver {}
+trait HasPsqlDriver extends DriverComponent {
+  val driver = new PostgresDriver {}
 }

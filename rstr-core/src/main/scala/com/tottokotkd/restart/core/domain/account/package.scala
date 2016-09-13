@@ -11,10 +11,6 @@ package object account {
 
   sealed class AuthProviderType
   object Twitter extends AuthProviderType
-
-  /***
-    *  for test
-    */
   object NotImplementedProvider extends AuthProviderType
 
   sealed class AccountManagerException(message: String = null, cause: Throwable = null) extends RstrRuntimeException(message, cause)
