@@ -24,11 +24,14 @@ trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
     *
     * @throws ResourceAlreadyInitializedError resouce data is already initialized
     */
-  def initResource(data: ResourceInfo = initialResource)(implicit accountInfo: AccountInfo): DBIO[ResourceInfo] = {
-    val dbData = ResourcesRow(accountId = accountInfo.id, money = data.money, cc = data.cc)
+  def initResource(stamp: ZonedDateTime, data: ResourceInfo = initialResource)(implicit accountInfo: AccountInfo): DBIO[ResourceInfo] = {
+    import Implicits.toSqlTimestamp
     val q = for {
       isExist <- Resources.filter(_.accountId === accountInfo.id).exists.result
-      _ <- if (isExist) DBIO.failed(ResourceAlreadyInitializedError) else Resources += dbData
+      _ <- if (isExist) DBIO.failed(ResourceAlreadyInitializedError) else for {
+        _ <- Resources += ResourcesRow(accountId = accountInfo.id, money = data.money, cc = data.cc)
+        _ <- CcGains += CcGainsRow(accountId = accountInfo.id, lastUpdate = stamp)
+      } yield ()
       d <- getResource
     } yield d
     q.transactionally
@@ -49,7 +52,7 @@ trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
     q.transactionally
   }
 
-  /*** save resource (sql update)
+  /*** save resource (ADMIN. TOOL)
     *
     * @param data resource data
     * @return update count
@@ -62,6 +65,20 @@ trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
       _ <- getResource
       result <- Resources.filter(_.accountId === accountInfo.id).update(toRow(data))
     } yield result
+    q.transactionally
+  }
+
+  /*** default routine to update resource (this DOES NOT initialize resouce data)
+    *
+    * @return latest resource data
+    */
+  def defaultUpdate(target: ZonedDateTime)(implicit accountInfo: AccountInfo): DBIO[ResourceInfo] = {
+    import Implicits.toZonedDateTime
+    val q = for {
+      resource <- getResource
+      lastCcUpdate <- CcGains.filter(_.accountId === accountInfo.id).map(_.lastUpdate).result.head
+      ccUpdated <- applyCcGain(data = resource, start = lastCcUpdate, end = target)
+    } yield ccUpdated
     q.transactionally
   }
 
@@ -82,7 +99,6 @@ trait ResourceManager extends TablesComponent with ResourceCalculatorComponent {
     } yield result
 
     resourceCalculator.ccGain(current = data.cc , start = start, end = end).map { ccValue =>
-      import Implicits._
       val newData = data.copy(cc = ccValue)
       for {
         _ <- Resources.filter(_.accountId === accountInfo.id).update(toResourceRow(newData))

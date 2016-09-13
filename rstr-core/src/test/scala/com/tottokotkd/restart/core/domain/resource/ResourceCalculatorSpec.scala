@@ -33,13 +33,13 @@ class ResourceCalculatorSpec extends mutable.Specification with HasResourceCalcu
         val result = resourceCalculator.ccGain(current = 0, start = start, end = start)
         result must beNone
       }
-      "(4) 1000 cc + 5 min. = None" >> {
+      "(4) 1000 cc + 5 min. = 1000" >> {
         val result = resourceCalculator.ccGain(current = 1000, start = start, end = start)
-        result must beNone
+        result must beSome(1000)
       }
-      "(5) 1200 cc + 9 min. = None" >> {
+      "(5) 1200 cc + 9 min. = 1200" >> {
         val result = resourceCalculator.ccGain(current = 1200, start = start, end = start)
-        result must beNone
+        result must beSome(1200)
       }
       "(6) 725 cc + 2 min. = 925" >> {
         val result = resourceCalculator.ccGain(current = 725, start = start, end = start.plusMinutes(2))

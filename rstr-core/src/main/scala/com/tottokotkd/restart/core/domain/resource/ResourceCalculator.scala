@@ -21,7 +21,7 @@ trait ResourceCalculator {
   def ccGain(current: Int, start: ZonedDateTime, end: ZonedDateTime): Option[Int] = gainByMinutes(current, ccGainPerMinute, start, end)
 
   private def gainByMinutes(current: Int, params: GainPerMinute, start: ZonedDateTime, end: ZonedDateTime): Option[Int] =
-    if (current >= params.maximum) None
+    if (current >= params.maximum) Some(current)
     else getInterval(start, end, ChronoUnit.MINUTES)
       .map{ minutes => math.min(params.maximum, current + params.value * minutes) }
 
