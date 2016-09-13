@@ -1,7 +1,4 @@
-GRANT USAGE
-ON SCHEMA rstr_data
-to rstr_users;
-
-GRANT SELECT
-ON ALL TABLES IN SCHEMA rstr_data
-TO ishtar_users;
+-- スキーマ作成
+CREATE SCHEMA rstr_account;
+CREATE SCHEMA rstr_data;
+CREATE SCHEMA rstr_stamp;

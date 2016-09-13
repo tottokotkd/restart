@@ -1,8 +1,11 @@
 package com.tottokotkd.restart.core.domain.account
 
+import java.time.ZoneId
+
 import com.tottokotkd.restart.core.model.driver.HasTestDriver
 import org.apache.commons.lang3.RandomStringUtils
 import org.specs2._
+
 import scala.util.Try
 
 /**
@@ -23,7 +26,7 @@ class AccountManagerSpec extends mutable.Specification with HasAccountManager wi
 
       "0. invalid provider" >> {
         val provider = NotImplementedProvider
-        Try(run(accountManager.createAccount(provider = provider, identity = "", name = ""))) must beFailedTry(AuthProviderNotFoundException)
+        Try(run(accountManager.createAccount(provider = provider, identity = "", name = "", zoneId = ZoneId.systemDefault))) must beFailedTry(AuthProviderNotFoundException)
       }
 
       "1. twitter" >> {
@@ -31,25 +34,22 @@ class AccountManagerSpec extends mutable.Specification with HasAccountManager wi
 
         val testId = generateTestTwitterId.toString
         val testName = generateTestName
+        val zone = ZoneId.systemDefault
 
-        val accountInfo = run(accountManager.createAccount(provider = provider, identity = testId, name = testName))
+        val accountInfo = run(accountManager.createAccount(provider = provider, identity = testId, name = testName, zoneId = ZoneId.systemDefault))
 
-        "a. to create provider specified data" >> {
-          val data = run(TwitterAccounts.filter(_.twitterId === testId.toInt).result)
-          data must be length 1
-          data.head.accountId must_== accountInfo.id.toInt
-        }
-        "b. to create account data" >> {
+        "1. account data creation" >> {
           val data = run(Accounts.filter(_.accountId === accountInfo.id).result)
           data must be length 1
           data.head.name must_== testName
+          run(TimeZoneIds.filter(_.code === zone.getId).map(_.zoneId).result.headOption) must beSome (data.head.zoneId)
         }
 
-        "c. to throw expected exceptions" >> {
-          val overlapCase = Try(run(accountManager.createAccount(provider = provider, identity = testId, name = testName)))
+        "2. expected errors" >> {
+          val overlapCase = Try(run(accountManager.createAccount(provider = provider, identity = testId, name = testName, zoneId = ZoneId.systemDefault)))
           overlapCase must beFailedTry(AlreadyUsedAuthIdException)
 
-          val invalidCase = Try(run(accountManager.createAccount(provider = provider, identity = "id must be numeric", name = testName)))
+          val invalidCase = Try(run(accountManager.createAccount(provider = provider, identity = "id must be numeric", name = testName, zoneId = ZoneId.systemDefault)))
           invalidCase must beFailedTry(InvalidAuthIdException)
         }
 
@@ -68,7 +68,7 @@ class AccountManagerSpec extends mutable.Specification with HasAccountManager wi
         val testId = generateTestTwitterId
         val testName = generateTestName
 
-        val account = run(accountManager.createAccount(provider = provider, identity = testId, name = testName))
+        val account = run(accountManager.createAccount(provider = provider, identity = testId, name = testName, zoneId = ZoneId.systemDefault))
 
         "a. to return correct data" >> {
           val data = run(accountManager.getAccount(provider = provider, identity = testId))

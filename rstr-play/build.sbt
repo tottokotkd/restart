@@ -5,8 +5,7 @@ version := "1.0"
 
 libraryDependencies ++= Seq(
   cache , ws, filters, specs2 % Test,
-  "commons-io" % "commons-io" % "2.4",
-  "org.xerial" % "sqlite-jdbc" % "3.8.11.2")
+  "commons-io" % "commons-io" % "2.4")
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
 
@@ -29,3 +28,13 @@ libraryDependencies ++= Seq(
   "org.webjars" % "bootstrap" % "4.0.0-alpha.3",
   "org.webjars" % "react" % "15.2.1"
 )
+
+/*
+  flyway
+ */
+flywayUrl := "jdbc:postgresql://localhost:5432/rstr_play"
+flywayUser := "rstr_admin"
+flywayPassword := "sXMYq7ez5fZZnstyXcEkLpYdhfmW37Ud"
+flywayLocations := Seq("filesystem:rstr-db/src/main/resources/db/migration")
+flywaySchemas := Seq("public", "rstr_account", "rstr_data", "rstr_stamp")
+flywayTable := "shcema_version"

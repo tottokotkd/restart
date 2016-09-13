@@ -1,5 +1,7 @@
 package com.tottokotkd.restart.core.domain.account.auth
 
+import java.time.ZoneId
+
 import com.tottokotkd.restart.core.domain.account._
 import com.tottokotkd.restart.core.model.TablesComponent
 
@@ -15,16 +17,12 @@ trait TwitterAuthProvider extends AuthProvider with TablesComponent {
   import tables._
   import tables.profile.api._
 
-  def createAccount(identity: String, name: String): DBIO[AccountId] = {
+  def registerAccount(accountId: AccountId, identity: String): DBIO[Int] = {
     val twitterId: Int = Try(identity.toInt).getOrElse(throw InvalidAuthIdException)
-    val autoIncrements = (AutoInc.Accounts.map(_.name)) returning AutoInc.Accounts.map(_.accountId)
 
     val q = for {
       isUsed <- TwitterAccounts.filter(_.twitterId === twitterId).exists.result
-      result <- if (isUsed) DBIO.failed(AlreadyUsedAuthIdException) else for {
-        accountId <- autoIncrements += name
-        _ <- TwitterAccounts += TwitterAccountsRow(twitterId = Some(twitterId), accountId = accountId.get)
-      } yield accountId.get
+      result <- if (isUsed) DBIO.failed(AlreadyUsedAuthIdException) else TwitterAccounts += TwitterAccountsRow(twitterId = twitterId, accountId = accountId)
     } yield result
     q.transactionally
   }

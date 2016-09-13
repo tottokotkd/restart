@@ -1,5 +1,7 @@
 package com.tottokotkd.restart.core.domain.account.auth
 
+import java.time.ZoneId
+
 import com.tottokotkd.restart.core.domain.account._
 import com.tottokotkd.restart.core.model.HasTables
 import slick.dbio.DBIO
@@ -10,14 +12,14 @@ import slick.dbio.DBIO
 trait AuthProvider {
 
   /***
-    * create account
+    * register account identity string
     * @param identity auth identity
-    * @return account id
+    * @return inserted row count
     *
     * @throws AlreadyUsedAuthIdException used id
     * @throws InvalidAuthIdException invalid id
     */
-  def createAccount(identity: String, name: String): DBIO[AccountId]
+  def registerAccount(accountId: AccountId, identity: String): DBIO[Int]
 
   /***
     * return account
